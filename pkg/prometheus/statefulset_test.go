@@ -15,13 +15,14 @@
 package prometheus
 
 import (
+	"reflect"
+	"testing"
+
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
 	"github.com/stretchr/testify/require"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reflect"
-	"testing"
 )
 
 var (
@@ -231,4 +232,29 @@ func makeConfigMap() *v1.ConfigMap {
 	res.Data["test3"] = "value 3"
 
 	return res
+}
+
+func TestHostNetwork(t *testing.T) {
+	labels := map[string]string{
+		"testlabel": "testlabelvalue",
+	}
+	annotations := map[string]string{
+		"testannotation": "testannotationvalue",
+	}
+
+	sset, err := makeStatefulSet(monitoringv1.Prometheus{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:      labels,
+			Annotations: annotations,
+		},
+		Spec: monitoringv1.PrometheusSpec{
+			HostNetwork: true,
+		},
+	}, nil, defaultTestConfig, []*v1.ConfigMap{})
+
+	require.NoError(t, err)
+
+	if sset.Spec.Template.Spec.HostNetwork != true || sset.Spec.Template.Spec.DNSPolicy != v1.DNSClusterFirstWithHostNet {
+		t.Fatal("HostNetwork is not set correctlly for prometheus statefulset")
+	}
 }
