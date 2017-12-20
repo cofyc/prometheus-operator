@@ -90,7 +90,7 @@ func Main() int {
 	}
 
 	web.Register(mux)
-	l, err := net.Listen("tcp", ":8080")
+	l, err := net.Listen("tcp", ":18080")
 	if err != nil {
 		fmt.Fprint(os.Stderr, "listening port 8080 failed", err)
 		return 1

@@ -23,6 +23,7 @@ import (
 
 	"github.com/coreos/prometheus-operator/pkg/client/monitoring"
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
+	monitoringv2 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v2"
 	"github.com/coreos/prometheus-operator/pkg/k8sutil"
 
 	"github.com/go-kit/kit/log"
@@ -1015,15 +1016,19 @@ func (c *Operator) selectServiceMonitors(p *monitoringv1.Prometheus) (map[string
 func (c *Operator) createCRDs() error {
 	_, pErr := c.mclient.MonitoringV1().Prometheuses(c.config.Namespace).List(metav1.ListOptions{})
 	_, sErr := c.mclient.MonitoringV1().ServiceMonitors(c.config.Namespace).List(metav1.ListOptions{})
-	if pErr == nil && sErr == nil {
+	_, v2pErr := c.mclient.MonitoringV2().Prometheuses(c.config.Namespace).List(metav1.ListOptions{})
+	_, v2sErr := c.mclient.MonitoringV2().ServiceMonitors(c.config.Namespace).List(metav1.ListOptions{})
+	if pErr == nil && sErr == nil && v2pErr == nil && v2sErr == nil {
 		// If Prometheus and ServiceMonitor objects are already registered, we
 		// won't attempt to do so again.
 		return nil
 	}
 
 	crds := []*extensionsobj.CustomResourceDefinition{
-		k8sutil.NewPrometheusCustomResourceDefinition(c.config.CrdKinds.Prometheus, c.config.CrdGroup, c.config.Labels.LabelsMap),
-		k8sutil.NewServiceMonitorCustomResourceDefinition(c.config.CrdKinds.ServiceMonitor, c.config.CrdGroup, c.config.Labels.LabelsMap),
+		k8sutil.NewPrometheusCustomResourceDefinition(c.config.CrdKinds.Prometheus, monitoringv1.Version, c.config.CrdGroup, c.config.Labels.LabelsMap),
+		k8sutil.NewServiceMonitorCustomResourceDefinition(c.config.CrdKinds.ServiceMonitor, monitoringv1.Version, c.config.CrdGroup, c.config.Labels.LabelsMap),
+		k8sutil.NewPrometheusCustomResourceDefinition(c.config.CrdKinds.Prometheus, monitoringv2.Version, c.config.CrdGroup, c.config.Labels.LabelsMap),
+		k8sutil.NewServiceMonitorCustomResourceDefinition(c.config.CrdKinds.ServiceMonitor, monitoringv2.Version, c.config.CrdGroup, c.config.Labels.LabelsMap),
 	}
 
 	crdClient := c.crdclient.ApiextensionsV1beta1().CustomResourceDefinitions()

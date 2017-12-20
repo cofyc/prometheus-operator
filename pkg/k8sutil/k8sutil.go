@@ -205,15 +205,19 @@ func NewAlertmanagerTPRDefinition() *extensionsobjold.ThirdPartyResource {
 	}
 }
 
-func NewPrometheusCustomResourceDefinition(crdkind monitoringv1.CrdKind, group string, labels map[string]string) *extensionsobj.CustomResourceDefinition {
+func NewPrometheusCustomResourceDefinition(crdkind monitoringv1.CrdKind, version string, group string, labels map[string]string) *extensionsobj.CustomResourceDefinition {
+	name := crdkind.Plural + "." + group
+	if version != monitoringv1.Version {
+		name = fmt.Sprintf("%s.%s.%s", crdkind.Plural, version, group)
+	}
 	return &extensionsobj.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   crdkind.Plural + "." + group,
+			Name:   name,
 			Labels: labels,
 		},
 		Spec: extensionsobj.CustomResourceDefinitionSpec{
 			Group:   group,
-			Version: monitoringv1.Version,
+			Version: version,
 			Scope:   extensionsobj.NamespaceScoped,
 			Names: extensionsobj.CustomResourceDefinitionNames{
 				Plural: crdkind.Plural,
@@ -223,16 +227,20 @@ func NewPrometheusCustomResourceDefinition(crdkind monitoringv1.CrdKind, group s
 	}
 }
 
-func NewServiceMonitorCustomResourceDefinition(crdkind monitoringv1.CrdKind, group string, labels map[string]string) *extensionsobj.CustomResourceDefinition {
+func NewServiceMonitorCustomResourceDefinition(crdkind monitoringv1.CrdKind, version string, group string, labels map[string]string) *extensionsobj.CustomResourceDefinition {
+	name := crdkind.Plural + "." + group
+	if version != monitoringv1.Version {
+		name = fmt.Sprintf("%s.%s.%s", crdkind.Plural, version, group)
+	}
 	return &extensionsobj.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   crdkind.Plural + "." + group,
+			Name:   name,
 			Labels: labels,
 		},
 
 		Spec: extensionsobj.CustomResourceDefinitionSpec{
 			Group:   group,
-			Version: monitoringv1.Version,
+			Version: version,
 			Scope:   extensionsobj.NamespaceScoped,
 			Names: extensionsobj.CustomResourceDefinitionNames{
 				Plural: crdkind.Plural,
@@ -242,15 +250,19 @@ func NewServiceMonitorCustomResourceDefinition(crdkind monitoringv1.CrdKind, gro
 	}
 }
 
-func NewAlertmanagerCustomResourceDefinition(crdkind monitoringv1.CrdKind, group string, labels map[string]string) *extensionsobj.CustomResourceDefinition {
+func NewAlertmanagerCustomResourceDefinition(crdkind monitoringv1.CrdKind, version string, group string, labels map[string]string) *extensionsobj.CustomResourceDefinition {
+	name := crdkind.Plural + "." + group
+	if version != monitoringv1.Version {
+		name = fmt.Sprintf("%s.%s.%s", crdkind.Plural, version, group)
+	}
 	return &extensionsobj.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   crdkind.Plural + "." + group,
+			Name:   name,
 			Labels: labels,
 		},
 		Spec: extensionsobj.CustomResourceDefinitionSpec{
 			Group:   group,
-			Version: monitoringv1.Version,
+			Version: version,
 			Scope:   extensionsobj.NamespaceScoped,
 			Names: extensionsobj.CustomResourceDefinitionNames{
 				Plural: crdkind.Plural,

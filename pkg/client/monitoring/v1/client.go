@@ -16,12 +16,13 @@ package v1
 
 import (
 	"fmt"
+	"strings"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"strings"
 )
 
 const (
@@ -31,6 +32,7 @@ const (
 	ServiceMonitorKindKey = "servicemonitor"
 )
 
+// TODO move CrdKind stuffs to pkg/client/monitoring, because they are shared by v1 & v2
 type CrdKind struct {
 	Kind   string
 	Plural string

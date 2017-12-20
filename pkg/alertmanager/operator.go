@@ -22,6 +22,7 @@ import (
 
 	"github.com/coreos/prometheus-operator/pkg/client/monitoring"
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
+	monitoringv2 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v2"
 	"github.com/coreos/prometheus-operator/pkg/k8sutil"
 	prometheusoperator "github.com/coreos/prometheus-operator/pkg/prometheus"
 
@@ -519,14 +520,16 @@ func (c *Operator) destroyAlertmanager(key string) error {
 
 func (c *Operator) createCRDs() error {
 	_, aErr := c.mclient.MonitoringV1().Alertmanagers(c.config.Namespace).List(metav1.ListOptions{})
-	if aErr == nil {
+	_, v2aErr := c.mclient.MonitoringV2().Alertmanagers(c.config.Namespace).List(metav1.ListOptions{})
+	if aErr == nil && v2aErr == nil {
 		// If Alertmanager objects are already registered, we won't attempt to
 		// do so again.
 		return nil
 	}
 
 	crds := []*extensionsobj.CustomResourceDefinition{
-		k8sutil.NewAlertmanagerCustomResourceDefinition(c.config.CrdKinds.Alertmanager, c.config.CrdGroup, c.config.Labels.LabelsMap),
+		k8sutil.NewAlertmanagerCustomResourceDefinition(c.config.CrdKinds.Alertmanager, monitoringv1.Version, c.config.CrdGroup, c.config.Labels.LabelsMap),
+		k8sutil.NewAlertmanagerCustomResourceDefinition(c.config.CrdKinds.Alertmanager, monitoringv2.Version, c.config.CrdGroup, c.config.Labels.LabelsMap),
 	}
 
 	crdClient := c.crdclient.ApiextensionsV1beta1().CustomResourceDefinitions()

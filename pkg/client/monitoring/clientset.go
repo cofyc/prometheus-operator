@@ -20,6 +20,7 @@ import (
 
 	"github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
 	"github.com/coreos/prometheus-operator/pkg/client/monitoring/v1alpha1"
+	"github.com/coreos/prometheus-operator/pkg/client/monitoring/v2"
 )
 
 var _ Interface = &Clientset{}
@@ -27,11 +28,13 @@ var _ Interface = &Clientset{}
 type Interface interface {
 	MonitoringV1alpha1() v1alpha1.MonitoringV1alpha1Interface
 	MonitoringV1() v1.MonitoringV1Interface
+	MonitoringV2() v2.MonitoringV2Interface
 }
 
 type Clientset struct {
 	*v1alpha1.MonitoringV1alpha1Client
 	*v1.MonitoringV1Client
+	*v2.MonitoringV2Client
 }
 
 func (c *Clientset) MonitoringV1alpha1() v1alpha1.MonitoringV1alpha1Interface {
@@ -48,6 +51,13 @@ func (c *Clientset) MonitoringV1() v1.MonitoringV1Interface {
 	return c.MonitoringV1Client
 }
 
+func (c *Clientset) MonitoringV2() v2.MonitoringV2Interface {
+	if c == nil {
+		return nil
+	}
+	return c.MonitoringV2Client
+}
+
 func NewForConfig(crdKinds *v1.CrdKinds, apiGroup string, c *rest.Config) (*Clientset, error) {
 	configShallowCopy := *c
 	if configShallowCopy.RateLimiter == nil && configShallowCopy.QPS > 0 {
@@ -62,6 +72,11 @@ func NewForConfig(crdKinds *v1.CrdKinds, apiGroup string, c *rest.Config) (*Clie
 	}
 
 	cs.MonitoringV1Client, err = v1.NewForConfig(crdKinds, apiGroup, &configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
+
+	cs.MonitoringV2Client, err = v2.NewForConfig(crdKinds, apiGroup, &configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
